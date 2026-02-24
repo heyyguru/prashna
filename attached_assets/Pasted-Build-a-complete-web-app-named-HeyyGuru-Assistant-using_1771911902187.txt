@@ -1,0 +1,70 @@
+Build a complete web app named “HeyyGuru Assistant” using ONLY:
+- Frontend: HTML, CSS, Vanilla JavaScript
+- Backend: PHP 8+
+- Database: MySQL (NOT PostgreSQL, NOT MongoDB)
+No OpenAI, no external AI APIs.
+
+Core Features:
+1) Roles: Student and Mentor
+2) Student Registration + Login
+   - Fields: name (required), phone (required), email (optional), password (required)
+   - Store password hashed using password_hash
+3) Mentor Login
+   - Mentors are created via database seeding or admin script (no public mentor registration)
+4) Doubt System:
+   - Student can create a new doubt: subject, question_text
+   - Save in MySQL with status = 'open'
+   - Student dashboard shows all their doubts + mentor replies, ordered newest first
+5) Mentor Dashboard:
+   - List all open doubts
+   - View doubt details, student name/phone/email
+   - Reply to doubt: answer_text
+   - When mentor replies: update status = 'answered', save answered_at
+6) Auto-reply basic messages (rule-based):
+   - If student chat input is "hi", "hello", "hey" => respond instantly:
+     "Hi! I’m HeyGuru Assistant. Please login to ask your doubt, or type your question if you're already logged in."
+   - If student says "how are you" => "I’m good! How can I help you today?"
+   - For anything else: if not logged-in, show message: "Please login to submit your doubt."
+   - If logged-in: store as doubt in database.
+7) Notifications:
+   - No paid SMS. Implement in-app notification:
+     Student sees “Answered” badge + answer in dashboard.
+   - Add OPTIONAL email sending function in PHP (SMTP settings in config.php) but keep disabled by default.
+   - Add placeholder function sendSMS($phone,$msg) with comments for future integration (Twilio/Fast2SMS), but do NOT require it.
+
+Tech/Structure Requirements:
+- Use PHP sessions for authentication.
+- Secure routes: students cannot access mentor pages, mentors cannot access student-only pages.
+- Use prepared statements (PDO or mysqli prepared statements) for SQL injection safety.
+- Use CSRF token on forms.
+- Add basic validation and clean error messages.
+- Clean UI: modern simple layout, responsive, “HeyGuruBot” branding.
+- Provide these pages:
+  /index.php (landing + quick chat UI)
+  /register.php
+  /login.php
+  /logout.php
+  /student/dashboard.php
+  /student/new_doubt.php
+  /mentor/login.php
+  /mentor/dashboard.php
+  /mentor/view_doubt.php?id=...
+- Add database setup:
+  /db/init.sql with tables + seed mentor user
+- Add config file:
+  /config.php contains DB host/user/pass/dbname
+  Include instructions in README.md for:
+  - Creating MySQL database in Hostinger
+  - Importing init.sql
+  - Updating config.php
+  - Running project in Replit and deploying to Hostinger
+
+Database Schema:
+- users: id, role(enum student/mentor), name, phone, email nullable, password_hash, created_at
+- doubts: id, student_id, subject, question_text, status(enum open/answered), created_at, answered_at nullable
+- replies: id, doubt_id, mentor_id, answer_text, created_at
+
+Also create a simple chat-like UI on index.php:
+- shows auto replies for greetings
+- if logged in, messages create a doubt
+- show response: “Thanks! Your doubt is submitted. A mentor will reply soon.”
