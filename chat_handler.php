@@ -48,12 +48,9 @@ if ($user && $user['role'] === 'student') {
     $stmt = $pdo->prepare("INSERT INTO doubts (student_id, subject, question_text) VALUES (?, 'General', ?)");
     $stmt->execute([$user['id'], $message]);
 
-    // Update the doubt status if it was 'answered' to 'open' if user asks again? 
-    // Actually, just inserting a new doubt is fine.
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     
-    // BUT WAIT: The CSRF token in the response should be fresh if needed, 
-    // though the current one is fine for the session.
-    echo json_encode(['reply' => "Thanks! Your doubt is submitted. A mentor will reply soon.", 'csrf_token' => csrf_token()]);
+    echo json_encode(['reply' => "Thanks! Your doubt is submitted. A mentor will reply soon.", 'csrf_token' => $_SESSION['csrf_token']]);
     exit;
 } else {
     // If user is mentor, they shouldn't be asking doubts here.

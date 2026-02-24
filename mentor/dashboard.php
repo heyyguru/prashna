@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
         $deleteId = (int)$_POST['delete_id'];
         $stmt = $pdo->prepare("DELETE FROM doubts WHERE id = ?");
         $stmt->execute([$deleteId]);
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         set_flash('success', 'Doubt deleted successfully.');
     }
     redirect('/mentor/dashboard.php');

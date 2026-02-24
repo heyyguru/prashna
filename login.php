@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($password, $user['password_hash'])) {
             $_SESSION['user_id'] = $user['id'];
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             redirect('/student/dashboard.php');
         } else {
             $errors[] = 'Invalid phone number or password.';

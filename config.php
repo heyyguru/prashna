@@ -33,7 +33,7 @@ function getDB(): PDO {
         $dbPath = SQLITE_PATH;
         $dbDir = dirname($dbPath);
         if (!is_dir($dbDir)) {
-            mkdir($dbDir, 0777, true);
+            mkdir($dbDir, 0755, true);
         }
         $needsInit = !file_exists($dbPath);
         $pdo = new PDO('sqlite:' . $dbPath, null, null, [

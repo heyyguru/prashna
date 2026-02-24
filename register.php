@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("INSERT INTO users (role, name, phone, email, password_hash) VALUES ('student', ?, ?, ?, ?)");
         $stmt->execute([$name, $phone, $email ?: null, $hash]);
         $_SESSION['user_id'] = $pdo->lastInsertId();
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         set_flash('success', 'Registration successful! Welcome to HeyyGuru.');
         redirect('/student/dashboard.php');
     }

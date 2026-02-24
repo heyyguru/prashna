@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo = getDB();
         $stmt = $pdo->prepare("INSERT INTO doubts (student_id, subject, question_text) VALUES (?, ?, ?)");
         $stmt->execute([$user['id'], $subject, $question]);
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         set_flash('success', 'Your doubt has been submitted! A mentor will reply soon.');
         redirect('/student/dashboard.php');
     }
