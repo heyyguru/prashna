@@ -114,14 +114,14 @@ $countAnswered = $pdo->query("SELECT COUNT(*) as c FROM doubts WHERE status='ans
                                 </div>
                                 <div class="doubt-meta">
                                     <span class="badge badge-<?= $d['status'] ?>"><?= h($d['status']) ?></span>
-                                    <div style="display:flex; gap:8px;">
-                                        <a href="/mentor/view_doubt.php?id=<?= $d['id'] ?>" class="btn btn-sm <?= $d['status'] === 'open' ? 'btn-success' : 'btn-secondary' ?>">
+                                    <div style="display:flex; gap:8px; align-items: center;">
+                                        <a href="/mentor/view_doubt.php?id=<?= $d['id'] ?>" class="btn-view-custom">
                                             <?= $d['status'] === 'open' ? 'Reply' : 'View' ?>
                                         </a>
-                                        <form method="POST" onsubmit="return confirm('Are you sure you want to delete this doubt?');" style="display:inline;">
+                                        <form method="POST" onsubmit="return confirm('Are you sure you want to delete this doubt?');" style="display:inline; margin:0;">
                                             <?= csrf_field() ?>
                                             <input type="hidden" name="delete_id" value="<?= $d['id'] ?>">
-                                            <button type="submit" class="btn btn-sm btn-danger" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
+                                            <button type="submit" class="btn-delete-custom">Delete</button>
                                         </form>
                                     </div>
                                 </div>
