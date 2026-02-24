@@ -286,9 +286,9 @@ body {
 }
 
 .search-box {
-    margin: 20px 0 30px;
+    margin: 0 0 30px;
     position: relative;
-    max-width: 600px;
+    width: 100%;
 }
 
 .search-box input {
@@ -298,26 +298,99 @@ body {
     border-radius: 20px;
     border: 2px solid #E2E8F0;
     font-size: 1rem;
-    transition: all 0.3s ease;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: #fff;
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    color: var(--text);
 }
 
 .search-box::before {
-    content: "🔍";
+    content: "";
     position: absolute;
     left: 20px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 1.2rem;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z' /%3E%3C/svg%3E");
+    background-repeat: no-repeat;
     z-index: 1;
 }
 
 .search-box input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+    box-shadow: 0 10px 25px rgba(74, 144, 226, 0.1);
     outline: none;
     transform: translateY(-2px);
+    background: #fff;
+}
+
+.search-box input::placeholder {
+    color: #94a3b8;
+}
+
+/* Answered Doubts Styling */
+.doubt-item-container.answered {
+    background: #fdfdfd;
+    border-left: 5px solid var(--success);
+}
+
+.doubt-item-container.answered .doubt-info h3 {
+    color: var(--text-light);
+}
+
+.doubt-item-container.answered .badge-answered {
+    background: var(--success);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 184, 148, 0.2);
+}
+
+@media (max-width: 768px) {
+    .card-header-flex {
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .card-header-flex div {
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px !important;
+    }
+    
+    .card-header-flex div .btn {
+        padding: 10px 5px !important;
+        font-size: 0.8rem !important;
+        text-align: center;
+        border-radius: 10px !important;
+    }
+
+    .doubt-item {
+        padding: 20px;
+    }
+
+    .doubt-meta {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #f1f5f9;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .doubt-meta .badge {
+        margin-bottom: 0;
+    }
+    
+    .doubt-info h3 {
+        font-size: 1.1rem;
+    }
+    
+    .doubt-info p {
+        font-size: 0.95rem;
+    }
 }
 
 .stats {

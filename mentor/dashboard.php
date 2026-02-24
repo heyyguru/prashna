@@ -105,7 +105,7 @@ $countAnswered = $pdo->query("SELECT COUNT(*) as c FROM doubts WHERE status='ans
             <?php else: ?>
                 <div class="doubt-list">
                     <?php foreach ($doubts as $d): ?>
-                        <div class="doubt-item-container">
+                        <div class="doubt-item-container <?= $d['status'] === 'answered' ? 'answered' : '' ?>">
                             <div class="doubt-item">
                                 <div class="doubt-info">
                                     <h3><?= h($d['subject']) ?> - <?= h($d['student_name']) ?></h3>
