@@ -285,6 +285,44 @@ body {
     }
 }
 
+.btn-view-custom {
+    background-color: var(--danger) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    transition: var(--transition) !important;
+    font-size: 0.85rem !important;
+}
+
+.btn-view-custom:hover {
+    background-color: #b91c1c !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+.btn-delete-custom {
+    background-color: #f3f4f6 !important;
+    color: #4b5563 !important;
+    border: 1px solid #e5e7eb !important;
+    padding: 8px 16px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    cursor: pointer;
+    transition: var(--transition) !important;
+    font-size: 0.85rem !important;
+}
+
+.btn-delete-custom:hover {
+    background-color: #e5e7eb !important;
+    color: var(--danger) !important;
+    border-color: var(--danger) !important;
+}
+
 .search-box {
     margin: 0 0 30px;
     position: relative;
