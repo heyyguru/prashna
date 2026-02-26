@@ -109,25 +109,6 @@ function initSQLiteDB(PDO $pdo): void {
     }
 }
 
-function sendEmail(string $to, string $subject, string $body): bool {
-    if (!ENABLE_EMAIL || empty($to)) return false;
-    $headers = "From: " . SMTP_FROM . "\r\n";
-    $headers .= "Reply-To: " . SMTP_FROM . "\r\n";
-    $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-    return mail($to, $subject, $body, $headers);
-}
-
-function sendEmailToMentors(string $subject, string $body): void {
-    $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT email FROM users WHERE role = 'mentor' AND email IS NOT NULL AND email != ''");
-    $stmt->execute();
-    $mentors = $stmt->fetchAll();
-    foreach ($mentors as $m) {
-        sendEmail($m['email'], $subject, $body);
-    }
-}
-
 function sendSMS(string $phone, string $msg): bool {
     return false;
 }
