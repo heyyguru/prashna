@@ -11,12 +11,31 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('SQLITE_PATH', __DIR__ . '/db/heyyguru.sqlite');
 
-define('ENABLE_EMAIL', false);
-define('SMTP_HOST', 'smtp.example.com');
+define('ENABLE_EMAIL', true);
+define('SMTP_HOST', 'smtp.heyyguru.in');
 define('SMTP_PORT', 587);
-define('SMTP_USER', '');
-define('SMTP_PASS', '');
-define('SMTP_FROM', 'noreply@heyyguru.com');
+define('SMTP_USER', 'doubt@heyyguru.in');
+define('SMTP_PASS', 'your_password_here'); 
+define('SMTP_FROM', 'doubt@heyyguru.in');
+
+function sendEmail(string $to, string $subject, string $body): bool {
+    if (!ENABLE_EMAIL || empty($to)) return false;
+    $headers = "From: " . SMTP_FROM . "\r\n";
+    $headers .= "Reply-To: " . SMTP_FROM . "\r\n";
+    $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+    return mail($to, $subject, $body, $headers);
+}
+
+function sendEmailToMentors(string $subject, string $body): void {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT email FROM users WHERE role = 'mentor' AND email IS NOT NULL AND email != ''");
+    $stmt->execute();
+    $mentors = $stmt->fetchAll();
+    foreach ($mentors as $m) {
+        sendEmail($m['email'], $subject, $body);
+    }
+}
 
 function getDB(): PDO {
     static $pdo = null;
@@ -91,8 +110,22 @@ function initSQLiteDB(PDO $pdo): void {
 }
 
 function sendEmail(string $to, string $subject, string $body): bool {
-    if (!ENABLE_EMAIL) return false;
-    return false;
+    if (!ENABLE_EMAIL || empty($to)) return false;
+    $headers = "From: " . SMTP_FROM . "\r\n";
+    $headers .= "Reply-To: " . SMTP_FROM . "\r\n";
+    $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+    return mail($to, $subject, $body, $headers);
+}
+
+function sendEmailToMentors(string $subject, string $body): void {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT email FROM users WHERE role = 'mentor' AND email IS NOT NULL AND email != ''");
+    $stmt->execute();
+    $mentors = $stmt->fetchAll();
+    foreach ($mentors as $m) {
+        sendEmail($m['email'], $subject, $body);
+    }
 }
 
 function sendSMS(string $phone, string $msg): bool {

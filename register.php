@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($name === '') $errors[] = 'Name is required.';
     if ($phone === '') $errors[] = 'Phone number is required.';
     if (!preg_match('/^[0-9]{7,15}$/', $phone)) $errors[] = 'Enter a valid phone number (digits only).';
+    if ($email === '') $errors[] = 'Email is required.';
     if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Enter a valid email.';
     if (strlen($password) < 6) $errors[] = 'Password must be at least 6 characters.';
     if ($password !== $confirm) $errors[] = 'Passwords do not match.';
@@ -46,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - <?= h(APP_NAME) ?></title>
+    <link rel="icon" type="image/png" href="/css/favicon.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -88,8 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="text" name="phone" value="<?= h($phone ?? '') ?>" required placeholder="e.g. 9876543210">
                 </div>
                 <div class="form-group">
-                    <label>Email (optional)</label>
-                    <input type="email" name="email" value="<?= h($email ?? '') ?>" placeholder="Enter your email address">
+                    <label>Email *</label>
+                    <input type="email" name="email" value="<?= h($email ?? '') ?>" required placeholder="Enter your email address">
                 </div>
                 <div class="form-group">
                     <label>Password *</label>

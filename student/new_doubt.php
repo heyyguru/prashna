@@ -17,6 +17,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo = getDB();
         $stmt = $pdo->prepare("INSERT INTO doubts (student_id, subject, question_text) VALUES (?, ?, ?)");
         $stmt->execute([$user['id'], $subject, $question]);
+        $doubt_id = $pdo->lastInsertId();
+        
+        // Notify Mentors
+        $mentor_subject = "New Doubt Asked: " . $subject;
+        $mentor_body = "A new doubt has been posted by " . h($user['name']) . ".<br>Subject: " . h($subject) . "<br>Question: " . h($question) . "<br><a href='https://heyyguru.in/mentor/view_doubt.php?id=" . $doubt_id . "'>View and Reply</a>";
+        sendEmailToMentors($mentor_subject, $mentor_body);
+
+        // Notify Student
+        $student_subject = "Doubt Submitted Successfully";
+        $student_body = "Hi " . h($user['name']) . ", your doubt on " . h($subject) . " has been submitted. Our mentors will reply soon.";
+        sendEmail($user['email'], $student_subject, $student_body);
+
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         set_flash('success', 'Your doubt has been submitted! A mentor will reply soon.');
         redirect('/student/dashboard.php');
@@ -29,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ask a Doubt - <?= h(APP_NAME) ?></title>
+    <link rel="icon" type="image/png" href="/css/favicon.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>

@@ -8,6 +8,7 @@ $user = current_user();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= h(APP_NAME) ?></title>
+    <link rel="icon" type="image/png" href="/css/favicon.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>

@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare("UPDATE doubts SET status = 'answered', answered_at = datetime('now') WHERE id = ?")->execute([$id]);
         }
 
-        sendEmail($doubt['student_email'] ?? '', 'Your doubt has been answered!', "Hi {$doubt['student_name']}, your doubt on '{$doubt['subject']}' has been answered. Login to view the reply.");
+        sendEmail($doubt['student_email'] ?? '', 'Your doubt has been answered!', "Hi {$doubt['student_name']}, your doubt on '{$doubt['subject']}' has been answered. <br><br><strong>Mentor's Reply:</strong><br>" . nl2br(h($answer)) . "<br><br>Login to view more details.");
         sendSMS($doubt['student_phone'], "Hi {$doubt['student_name']}, your doubt has been answered on HeyyGuru!");
 
         set_flash('success', 'Reply sent successfully!');
@@ -62,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Doubt - <?= h(APP_NAME) ?></title>
+    <link rel="icon" type="image/png" href="/css/favicon.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
