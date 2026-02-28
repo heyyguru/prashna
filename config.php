@@ -11,6 +11,9 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('SQLITE_PATH', __DIR__ . '/db/heyyguru.sqlite');
 
+// Note: ENABLE_EMAIL is set to true, but actual email delivery 
+// requires a configured SMTP server (like Postfix/Exim) or 
+// using a library like PHPMailer for remote SMTP (e.g., Hostinger, Gmail).
 define('ENABLE_EMAIL', true);
 define('SMTP_HOST', 'smtp.heyyguru.in');
 define('SMTP_PORT', 587);
