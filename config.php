@@ -25,8 +25,12 @@ define('SMTP_FROM', 'doubt@heyyguru.in');
  * Note on Zoho Email:
  * 1. Enable 2FA in Zoho.
  * 2. Generate an "App-Specific Password" for this application.
- * 3. Use port 465 (SSL) or 587 (TLS).
+ * 3. Use port 465 (SSL).
  * 4. Ensure the SMTP_FROM matches your Zoho account email.
+ * 
+ * IMPORTANT: PHP's native mail() function may not support SMTP Auth (Zoho requirements)
+ * out of the box on all servers. For reliable delivery on Hostinger/Production, 
+ * using a library like PHPMailer is recommended.
  */
 function sendEmail(string $to, string $subject, string $body): bool {
     if (!ENABLE_EMAIL || empty($to)) return false;
