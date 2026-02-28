@@ -15,12 +15,19 @@ define('SQLITE_PATH', __DIR__ . '/db/heyyguru.sqlite');
 // requires a configured SMTP server (like Postfix/Exim) or 
 // using a library like PHPMailer for remote SMTP (e.g., Hostinger, Gmail).
 define('ENABLE_EMAIL', true);
-define('SMTP_HOST', 'smtp.heyyguru.in');
-define('SMTP_PORT', 587);
+define('SMTP_HOST', 'smtp.zoho.in'); // or smtp.zoho.com for global users
+define('SMTP_PORT', 465); // SSL port for Zoho
 define('SMTP_USER', 'doubt@heyyguru.in');
-define('SMTP_PASS', 'your_password_here'); 
+define('SMTP_PASS', 'your_zoho_app_password'); 
 define('SMTP_FROM', 'doubt@heyyguru.in');
 
+/**
+ * Note on Zoho Email:
+ * 1. Enable 2FA in Zoho.
+ * 2. Generate an "App-Specific Password" for this application.
+ * 3. Use port 465 (SSL) or 587 (TLS).
+ * 4. Ensure the SMTP_FROM matches your Zoho account email.
+ */
 function sendEmail(string $to, string $subject, string $body): bool {
     if (!ENABLE_EMAIL || empty($to)) return false;
     $headers = "From: " . SMTP_FROM . "\r\n";
