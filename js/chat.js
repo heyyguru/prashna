@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    addMessage("Hi! I'm HeyyGuru Assistant. Ask me anything or type a greeting!", 'bot');
+    addMessage("Hi! I'm Prashna. Ask me anything or type a greeting!", 'bot');
 
     chatForm.addEventListener('submit', function(e) {
         e.preventDefault();

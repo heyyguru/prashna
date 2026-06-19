@@ -36,13 +36,14 @@ $countAnswered = $pdo->query("SELECT COUNT(*) as c FROM doubts WHERE status='ans
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mentor Dashboard - <?= h(APP_NAME) ?></title>
+    <link rel="icon" type="image/png" href="/css/logosq.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <a href="/" class="brand">
-                <img src="/css/logo.jpg" alt="Prashna Logo" class="logo">
+                <img src="/css/favicon.png" alt="Prashna Logo" class="logo">
                 <span><?= h(APP_NAME) ?></span>
             </a>
             <div class="nav-toggle" id="navToggle">

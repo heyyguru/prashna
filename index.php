@@ -8,14 +8,14 @@ $user = current_user();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= h(APP_NAME) ?></title>
-    <link rel="icon" type="image/png" href="/css/favicon.png">
+    <link rel="icon" type="image/png" href="/css/logosq.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <a href="/" class="brand">
-                <img src="/css/logo.jpg" alt="<?= h(APP_NAME) ?> Logo" class="logo">
+                <img src="/css/favicon.png" alt="<?= h(APP_NAME) ?> Logo" class="logo">
                 <span><?= h(APP_NAME) ?></span>
             </a>
             <div class="nav-links" id="navLinks">
@@ -80,22 +80,22 @@ $user = current_user();
             <div class="marketing-grid">
                 <!-- AARAMBH Course -->
                 <div class="promo-card aarambh">
-                    <span class="badge" style="background: #feb2b2; color: #9b2c2c; margin-bottom: 15px;">BEST SELLER</span>
+                    <span class="badge" style="background: #feb2b2; color: #9b2c2c; margin-bottom: 15px;">BEST</span>
                     <h3 style="font-size: 2rem; font-weight: 850; margin-bottom: 10px;">AARAMBH</h3>
                     <p><strong>Perfect Start for Young Learners</strong></p>
                     <ul>
-                        <li>Strong foundation in Maths, English & EVS</li>
+                        <li>Build Strong Foundation</li>
                         <li>Fun and interactive live classes</li>
                         <li>Concept clarity from basics</li>
                         <li>Focus on confidence and interest in studies</li>
                         <li>Activity-based learning + worksheets</li>
                         <li>Daily practice for better understanding</li>
                         <li>Personal mentor support</li>
-                        <li>Ideal for Class 1 to 5 beginners</li>
+                        <li>Ideal for Class 1 to 10 beginners</li>
                     </ul>
                     <div class="price-tag">₹19</div>
                     <p class="promo-goal">Goal: Build strong basics, confidence, and love for learning.</p>
-                    <a href="/register.php" class="btn btn-primary btn-block" style="background: #e53e3e; margin-top: 20px;">Book Now @ ₹19</a>
+                    <a href="https://pages.razorpay.com/pl_SLumAbMSmh4FUT/view" class="btn btn-primary btn-block" style="background: #e53e3e; margin-top: 20px;">Start Now @ ₹19</a>
                 </div>
 
                 <!-- Learn India Initiative -->
@@ -115,7 +115,7 @@ $user = current_user();
                     </ul>
                     <div class="price-tag">₹599</div>
                     <p class="promo-goal">Goal: Prepare students for real life, future careers, and smart decision making.</p>
-                    <a href="/register.php" class="btn btn-primary btn-block" style="background: #2f855a; margin-top: 20px;">Join Movement @ ₹599</a>
+                    <a href="https://heyyguru.in/learn-india" class="btn btn-primary btn-block" style="background: #2f855a; margin-top: 20px;">Join Movement @ ₹599</a>
                 </div>
             </div>
         </div>

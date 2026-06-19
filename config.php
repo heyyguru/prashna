@@ -1,128 +1,114 @@
 <?php
+// -------------------------
+// DEBUG (turn OFF later)
+// -------------------------
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
+// Log errors to a file (create logs/ folder)
+ini_set('log_errors', '1');
+ini_set('error_log', __DIR__ . '/logs/php-error.log');
+
+// -------------------------
+// App
+// -------------------------
 define('APP_NAME', 'Prashna');
 define('APP_VERSION', '1.0');
 
-// For Hostinger/production: change to 'mysql' and update credentials below
-// For Replit local development: 'sqlite' works out of the box
-define('DB_DRIVER', 'sqlite');
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'heyyguru');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('SQLITE_PATH', __DIR__ . '/db/heyyguru.sqlite');
-
-// Note: ENABLE_EMAIL is set to true, but actual email delivery 
-// requires a configured SMTP server (like Postfix/Exim) or 
-// using a library like PHPMailer for remote SMTP (e.g., Hostinger, Gmail).
-define('ENABLE_EMAIL', true);
-define('SMTP_HOST', 'smtp.zoho.in'); // or smtp.zoho.com for global users
-define('SMTP_PORT', 465); // SSL port for Zoho
-define('SMTP_USER', 'doubt@heyyguru.in');
-define('SMTP_PASS', 'your_zoho_app_password'); 
-define('SMTP_FROM', 'doubt@heyyguru.in');
-
-/**
- * Note on Zoho Email:
- * 1. Enable 2FA in Zoho.
- * 2. Generate an "App-Specific Password" for this application.
- * 3. Use port 465 (SSL).
- * 4. Ensure the SMTP_FROM matches your Zoho account email.
- * 
- * IMPORTANT: PHP's native mail() function may not support SMTP Auth (Zoho requirements)
- * out of the box on all servers. For reliable delivery on Hostinger/Production, 
- * using a library like PHPMailer is recommended.
- */
-function sendEmail(string $to, string $subject, string $body): bool {
-    if (!ENABLE_EMAIL || empty($to)) return false;
-    $headers = "From: " . SMTP_FROM . "\r\n";
-    $headers .= "Reply-To: " . SMTP_FROM . "\r\n";
-    $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-    return mail($to, $subject, $body, $headers);
-}
-
-function sendEmailToMentors(string $subject, string $body): void {
-    $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT email FROM users WHERE role = 'mentor' AND email IS NOT NULL AND email != ''");
-    $stmt->execute();
-    $mentors = $stmt->fetchAll();
-    foreach ($mentors as $m) {
-        sendEmail($m['email'], $subject, $body);
+// -------------------------
+// Load .env
+// -------------------------
+$envPath = __DIR__ . '/.env';
+if (file_exists($envPath)) {
+    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') !== false) {
+            list($name, $value) = explode('=', $line, 2);
+            $name = trim($name);
+            $value = trim(trim($value), '"\'');
+            if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+                putenv(sprintf('%s=%s', $name, $value));
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
+            }
+        }
     }
 }
 
+// -------------------------
+// DB (MySQL)
+// -------------------------
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_NAME', getenv('DB_NAME') ?: '');
+define('DB_USER', getenv('DB_USER') ?: '');
+define('DB_PASS', getenv('DB_PASS') ?: '');
+
+// -------------------------
+// Security
+// -------------------------
+define('JWT_SECRET', getenv('JWT_SECRET') ?: 'fallback_secret_key_change_me');
+
+// -------------------------
+// Email (Zoho SMTP settings)
+// NOTE: PHP mail() will ignore SMTP_*.
+// We'll keep config ready; use PHPMailer to actually send via Zoho.
+// -------------------------
+define('ENABLE_EMAIL', true);
+define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp.zoho.in'); // or smtp.zoho.com
+define('SMTP_PORT', getenv('SMTP_PORT') ?: 587);            // 587 (TLS) recommended; use 465 (SSL) if needed
+define('SMTP_USER', getenv('SMTP_USER') ?: '');
+define('SMTP_PASS', getenv('SMTP_PASS') ?: ''); // <-- App Password only
+define('SMTP_FROM', getenv('SMTP_FROM') ?: '');
+
+// -------------------------
+// DB Connection
+// -------------------------
 function getDB(): PDO {
     static $pdo = null;
     if ($pdo !== null) return $pdo;
 
-    if (DB_DRIVER === 'mysql') {
-        $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+    $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+
+    try {
         $pdo = new PDO($dsn, DB_USER, DB_PASS, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES => false,
         ]);
-    } else {
-        $dbPath = SQLITE_PATH;
-        $dbDir = dirname($dbPath);
-        if (!is_dir($dbDir)) {
-            mkdir($dbDir, 0755, true);
-        }
-        $needsInit = !file_exists($dbPath);
-        $pdo = new PDO('sqlite:' . $dbPath, null, null, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
-        $pdo->exec('PRAGMA journal_mode=WAL');
-        $pdo->exec('PRAGMA foreign_keys=ON');
-        if ($needsInit) {
-            initSQLiteDB($pdo);
-        }
+    } catch (Throwable $e) {
+        // Log full error and show short error on screen
+        error_log("DB Connection Failed: " . $e->getMessage());
+        http_response_code(500);
+        die("Database connection failed. Check logs/php-error.log");
     }
+
     return $pdo;
 }
 
-function initSQLiteDB(PDO $pdo): void {
-    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        role TEXT NOT NULL DEFAULT 'student' CHECK(role IN ('student','mentor')),
-        name TEXT NOT NULL,
-        phone TEXT NOT NULL UNIQUE,
-        email TEXT DEFAULT NULL,
-        password_hash TEXT NOT NULL,
-        created_at DATETIME NOT NULL DEFAULT (datetime('now'))
-    )");
+// -------------------------
+// TEMP Email (uses mail())
+// This does NOT use Zoho SMTP.
+// Replace with PHPMailer if you want Zoho SMTP delivery.
+// -------------------------
+function sendEmail(string $to, string $subject, string $body): bool {
+    if (!ENABLE_EMAIL || empty($to)) return false;
 
-    $pdo->exec("CREATE TABLE IF NOT EXISTS doubts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        student_id INTEGER NOT NULL,
-        subject TEXT NOT NULL,
-        question_text TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'open' CHECK(status IN ('open','answered')),
-        created_at DATETIME NOT NULL DEFAULT (datetime('now')),
-        answered_at DATETIME DEFAULT NULL,
-        FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
-    )");
+    $headers = "From: " . SMTP_FROM . "\r\n";
+    $headers .= "Reply-To: " . SMTP_FROM . "\r\n";
+    $headers .= "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
-    $pdo->exec("CREATE TABLE IF NOT EXISTS replies (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        doubt_id INTEGER NOT NULL,
-        mentor_id INTEGER NOT NULL,
-        answer_text TEXT NOT NULL,
-        created_at DATETIME NOT NULL DEFAULT (datetime('now')),
-        FOREIGN KEY (doubt_id) REFERENCES doubts(id) ON DELETE CASCADE,
-        FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE
-    )");
-
-    $hash = password_hash('password', PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE phone = '9999999999'");
-    $stmt->execute();
-    if (!$stmt->fetch()) {
-        $stmt = $pdo->prepare("INSERT INTO users (role, name, phone, email, password_hash) VALUES ('mentor', 'Guru Mentor', '9999999999', 'mentor@heyyguru.com', ?)");
-        $stmt->execute([$hash]);
-    }
+    return mail($to, $subject, $body, $headers);
 }
 
-function sendSMS(string $phone, string $msg): bool {
-    return false;
+function sendEmailToMentors(string $subject, string $body): void {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT email FROM users WHERE role='mentor' AND email IS NOT NULL AND email != ''");
+    $stmt->execute();
+
+    foreach ($stmt->fetchAll() as $m) {
+        sendEmail($m['email'], $subject, $body);
+    }
 }

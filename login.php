@@ -23,8 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password_hash'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            login_user((int)$user['id']);
             redirect('/student/dashboard.php');
         } else {
             $errors[] = 'Invalid phone number or password.';
@@ -38,14 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Login - <?= h(APP_NAME) ?></title>
-    <link rel="icon" type="image/png" href="/css/favicon.png">
+    <link rel="icon" type="image/png" href="/css/logosq.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <a href="/" class="brand">
-                <img src="/css/logo.jpg" alt="HeyyGuru Logo" class="logo">
+                <img src="/css/favicon.png" alt="HeyyGuru Logo" class="logo">
                 <span><?= h(APP_NAME) ?></span>
             </a>
             <div class="nav-toggle" id="navToggle">

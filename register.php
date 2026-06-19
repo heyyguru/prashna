@@ -34,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $pdo->prepare("INSERT INTO users (role, name, phone, email, password_hash) VALUES ('student', ?, ?, ?, ?)");
         $stmt->execute([$name, $phone, $email ?: null, $hash]);
-        $_SESSION['user_id'] = $pdo->lastInsertId();
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        $user_id = (int)$pdo->lastInsertId();
+        login_user($user_id);
         set_flash('success', 'Registration successful! Welcome to HeyyGuru.');
         redirect('/student/dashboard.php');
     }
@@ -47,14 +47,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - <?= h(APP_NAME) ?></title>
-    <link rel="icon" type="image/png" href="/css/favicon.png">
+    <link rel="icon" type="image/png" href="/css/logosq.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <a href="/" class="brand">
-                <img src="/css/logo.jpg" alt="HeyyGuru Logo" class="logo">
+                <img src="/css/favicon.png" alt="HeyyGuru Logo" class="logo">
                 <span><?= h(APP_NAME) ?></span>
             </a>
             <div class="nav-toggle" id="navToggle">

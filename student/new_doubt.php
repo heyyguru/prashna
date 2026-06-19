@@ -41,14 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ask a Doubt - <?= h(APP_NAME) ?></title>
-    <link rel="icon" type="image/png" href="/css/favicon.png">
+    <link rel="icon" type="image/png" href="/css/logosq.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <a href="/" class="brand">
-                <img src="/css/logo.jpg" alt="<?= h(APP_NAME) ?> Logo" class="logo">
+                <img src="/css/favicon.png" alt="<?= h(APP_NAME) ?> Logo" class="logo">
                 <span><?= h(APP_NAME) ?></span>
             </a>
             <div class="nav-toggle" id="navToggle">
@@ -81,13 +81,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label>Subject *</label>
                     <select name="subject" required>
                         <option value="">-- Select Subject --</option>
-                        <option <?= ($subject ?? '') === 'Mathematics' ? 'selected' : '' ?>>Mathematics</option>
+                        <option <?= ($subject ?? '') === 'Mathematics/Vedic Maths' ? 'selected' : '' ?>>Mathematics</option>
                         <option <?= ($subject ?? '') === 'Physics' ? 'selected' : '' ?>>Physics</option>
                         <option <?= ($subject ?? '') === 'Chemistry' ? 'selected' : '' ?>>Chemistry</option>
                         <option <?= ($subject ?? '') === 'Biology' ? 'selected' : '' ?>>Biology</option>
-                        <option <?= ($subject ?? '') === 'Computer Science' ? 'selected' : '' ?>>Computer Science</option>
-                        <option <?= ($subject ?? '') === 'English' ? 'selected' : '' ?>>English</option>
-                        <option <?= ($subject ?? '') === 'General' ? 'selected' : '' ?>>General</option>
+                        <option <?= ($subject ?? '') === 'Learn India' ? 'selected' : '' ?>>Learn India</option>
+                        <option <?= ($subject ?? '') === 'English Grammar' ? 'selected' : '' ?>>English</option>
+                        <option <?= ($subject ?? '') === 'EVS/Science' ? 'selected' : '' ?>>EVS/Science</option>
+                        <option <?= ($subject ?? '') === 'Social Science' ? 'selected' : '' ?>>Social Science</option>
                         <option <?= ($subject ?? '') === 'Other' ? 'selected' : '' ?>>Other</option>
                     </select>
                 </div>

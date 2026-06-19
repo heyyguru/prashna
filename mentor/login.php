@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password_hash'])) {
-            $_SESSION['user_id'] = $user['id'];
+            login_user((int)$user['id']);
             redirect('/mentor/dashboard.php');
         } else {
             $errors[] = 'Invalid credentials.';
@@ -37,13 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mentor Login - <?= h(APP_NAME) ?></title>
+    <link rel="icon" type="image/png" href="/css/logosq.png">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <a href="/" class="brand">
-                <img src="/css/logo.jpg" alt="<?= h(APP_NAME) ?> Logo" class="logo">
+                <img src="/css/favicon.png" alt="<?= h(APP_NAME) ?> Logo" class="logo">
                 <span><?= h(APP_NAME) ?></span>
             </a>
             <div class="nav-toggle" id="navToggle">
@@ -77,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" name="password" required>
-                    <div class="hint">Default mentor: phone 9999999999, password: password</div>
+                
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Mentor Login</button>
             </form>
