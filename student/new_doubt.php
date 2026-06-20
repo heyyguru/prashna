@@ -10,8 +10,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject = trim($_POST['subject'] ?? '');
     $question = trim($_POST['question_text'] ?? '');
 
-    if ($subject === '') $errors[] = 'Subject is required.';
-    if ($question === '') $errors[] = 'Question is required.';
+    $allowed_subjects = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Learn India', 'English', 'EVS/Science', 'Social Science', 'Other'];
+    if (!in_array($subject, $allowed_subjects)) {
+        $errors[] = 'Invalid subject selected.';
+    }
+
+    if ($question === '') {
+        $errors[] = 'Question is required.';
+    } elseif (strlen($question) > 5000) {
+        $errors[] = 'Question is too long (maximum 5000 characters).';
+    }
 
     if (empty($errors)) {
         $pdo = getDB();

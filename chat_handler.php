@@ -15,6 +15,10 @@ if ($message === '') {
     echo json_encode(['reply' => 'Please type a message.']);
     exit;
 }
+if (strlen($message) > 2000) {
+    echo json_encode(['reply' => 'Message is too long. Please keep it under 2000 characters.']);
+    exit;
+}
 
 $lower = strtolower($message);
 

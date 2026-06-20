@@ -13,20 +13,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phone = trim($_POST['phone'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if ($phone === '') $errors[] = 'Phone number is required.';
-    if ($password === '') $errors[] = 'Password is required.';
+    if ($phone === '') {
+        $errors[] = 'Phone number is required.';
+    } elseif (!preg_match('/^[0-9]{7,15}$/', $phone)) {
+        $errors[] = 'Invalid phone number format.';
+    }
+
+    if ($password === '') {
+        $errors[] = 'Password is required.';
+    } elseif (strlen($password) > 255) {
+        $errors[] = 'Invalid password.';
+    }
 
     if (empty($errors)) {
         $pdo = getDB();
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE phone = ? AND role = 'mentor'");
-        $stmt->execute([$phone]);
-        $user = $stmt->fetch();
-
-        if ($user && password_verify($password, $user['password_hash'])) {
-            login_user((int)$user['id']);
-            redirect('/mentor/dashboard.php');
+        $ip_address = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        
+        $stmt_rate = $pdo->prepare("SELECT COUNT(*) as attempts FROM login_attempts WHERE ip_address = ? AND phone = ? AND attempt_time > (NOW() - INTERVAL 15 MINUTE)");
+        $stmt_rate->execute([$ip_address, $phone]);
+        $attempts = (int)$stmt_rate->fetch()['attempts'];
+        
+        if ($attempts >= 5) {
+            $errors[] = 'Too many login attempts. Please try again after 15 minutes.';
         } else {
-            $errors[] = 'Invalid credentials.';
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE phone = ? AND role = 'mentor'");
+            $stmt->execute([$phone]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password_hash'])) {
+                if ($user['email_verified_at'] === null) {
+                    $errors[] = 'Please verify your email address before logging in. Check your email for the verification link.';
+                } else {
+                    $stmt_clear = $pdo->prepare("DELETE FROM login_attempts WHERE ip_address = ? AND phone = ?");
+                    $stmt_clear->execute([$ip_address, $phone]);
+                    
+                    login_user((int)$user['id']);
+                    redirect('/mentor/dashboard.php');
+                }
+            } else {
+                $stmt_fail = $pdo->prepare("INSERT INTO login_attempts (ip_address, phone) VALUES (?, ?)");
+                $stmt_fail->execute([$ip_address, $phone]);
+                
+                $errors[] = 'Invalid credentials.';
+            }
         }
     }
 }

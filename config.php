@@ -47,8 +47,11 @@ define('DB_PASS', getenv('DB_PASS') ?: '');
 
 // -------------------------
 // Security
-// -------------------------
-define('JWT_SECRET', getenv('JWT_SECRET') ?: 'fallback_secret_key_change_me');
+$jwtSecret = getenv('JWT_SECRET');
+if (empty($jwtSecret) || $jwtSecret === 'fallback_secret_key_change_me') {
+    die("CRITICAL ERROR: JWT_SECRET environment variable is not set properly.");
+}
+define('JWT_SECRET', $jwtSecret);
 
 // -------------------------
 // Email (Zoho SMTP settings)

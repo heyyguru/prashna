@@ -1,0 +1,6 @@
+<FilesMatch "^\.env|^\.git|\.log$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+Options -Indexes

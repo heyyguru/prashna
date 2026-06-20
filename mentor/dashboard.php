@@ -9,21 +9,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
         set_flash('error', 'Invalid form submission.');
     } else {
         $deleteId = (int)$_POST['delete_id'];
-        $stmt = $pdo->prepare("DELETE FROM doubts WHERE id = ?");
-        $stmt->execute([$deleteId]);
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        set_flash('success', 'Doubt deleted successfully.');
+        if ($deleteId <= 0) {
+            set_flash('error', 'Invalid doubt ID.');
+            redirect('/mentor/dashboard.php');
+        }
+        
+        // Ownership check: Mentor must have replied to this doubt
+        $checkStmt = $pdo->prepare("SELECT 1 FROM replies WHERE doubt_id = ? AND mentor_id = ?");
+        $checkStmt->execute([$deleteId, $user['id']]);
+        
+        if ($checkStmt->fetch()) {
+            $stmt = $pdo->prepare("DELETE FROM doubts WHERE id = ?");
+            $stmt->execute([$deleteId]);
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            set_flash('success', 'Doubt deleted successfully.');
+        } else {
+            set_flash('error', 'Permission denied: You can only delete doubts you have replied to.');
+        }
     }
     redirect('/mentor/dashboard.php');
 }
 
 $filter = $_GET['filter'] ?? 'open';
+if (!in_array($filter, ['open', 'answered', 'all'])) {
+    $filter = 'open';
+}
+
 if ($filter === 'all') {
-    $stmt = $pdo->prepare("SELECT d.*, u.name as student_name FROM doubts d JOIN users u ON d.student_id = u.id ORDER BY d.created_at DESC");
-    $stmt->execute();
+    $stmt = $pdo->prepare("SELECT d.*, u.name as student_name, EXISTS(SELECT 1 FROM replies r WHERE r.doubt_id = d.id AND r.mentor_id = ?) as can_delete FROM doubts d JOIN users u ON d.student_id = u.id ORDER BY d.created_at DESC");
+    $stmt->execute([$user['id']]);
 } else {
-    $stmt = $pdo->prepare("SELECT d.*, u.name as student_name FROM doubts d JOIN users u ON d.student_id = u.id WHERE d.status = ? ORDER BY d.created_at DESC");
-    $stmt->execute([$filter]);
+    $stmt = $pdo->prepare("SELECT d.*, u.name as student_name, EXISTS(SELECT 1 FROM replies r WHERE r.doubt_id = d.id AND r.mentor_id = ?) as can_delete FROM doubts d JOIN users u ON d.student_id = u.id WHERE d.status = ? ORDER BY d.created_at DESC");
+    $stmt->execute([$user['id'], $filter]);
 }
 $doubts = $stmt->fetchAll();
 
@@ -119,11 +136,13 @@ $countAnswered = $pdo->query("SELECT COUNT(*) as c FROM doubts WHERE status='ans
                                         <a href="/mentor/view_doubt.php?id=<?= $d['id'] ?>" class="btn-view-custom">
                                             <?= $d['status'] === 'open' ? 'Reply' : 'View' ?>
                                         </a>
+                                        <?php if (!empty($d['can_delete'])): ?>
                                         <form method="POST" onsubmit="return confirm('Are you sure you want to delete this doubt?');" style="display:inline; margin:0;">
                                             <?= csrf_field() ?>
                                             <input type="hidden" name="delete_id" value="<?= $d['id'] ?>">
                                             <button type="submit" class="btn-delete-custom">Delete</button>
                                         </form>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>

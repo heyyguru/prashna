@@ -13,10 +13,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_doubt'])) {
     if (!verify_csrf()) {
         set_flash('error', 'Invalid form submission.');
     } else {
-        $stmt = $pdo->prepare("DELETE FROM doubts WHERE id = ?");
-        $stmt->execute([$id]);
-        set_flash('success', 'Doubt deleted successfully.');
-        redirect('/mentor/dashboard.php');
+        $checkStmt = $pdo->prepare("SELECT 1 FROM replies WHERE doubt_id = ? AND mentor_id = ?");
+        $checkStmt->execute([$id, $user['id']]);
+        if ($checkStmt->fetch()) {
+            $stmt = $pdo->prepare("DELETE FROM doubts WHERE id = ?");
+            $stmt->execute([$id]);
+            set_flash('success', 'Doubt deleted successfully.');
+            redirect('/mentor/dashboard.php');
+        } else {
+            set_flash('error', 'Permission denied: You can only delete doubts you have replied to.');
+            redirect('/mentor/view_doubt.php?id=' . $id);
+        }
     }
 }
 
@@ -49,13 +56,26 @@ $rs = $pdo->prepare("
 $rs->execute([$id]);
 $replies = $rs->fetchAll();
 
+$hasReplied = false;
+foreach ($replies as $r) {
+    if ((int)$r['mentor_id'] === (int)$user['id']) {
+        $hasReplied = true;
+        break;
+    }
+}
+
 // Reply submit
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_doubt'])) {
     if (!verify_csrf()) { $errors[] = 'Invalid form submission.'; }
 
     $answer = trim($_POST['answer_text'] ?? '');
-    if ($answer === '') $errors[] = 'Answer is required.';
+    
+    if ($answer === '') {
+        $errors[] = 'Answer cannot be empty.';
+    } elseif (strlen($answer) > 5000) {
+        $errors[] = 'Answer is too long (maximum 5000 characters).';
+    }
 
     if (empty($errors)) {
         // Insert reply
@@ -123,10 +143,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_doubt'])) {
             Doubt #<?= (int)$id ?>
             <span class="badge badge-<?= h($doubt['status']) ?>"><?= h($doubt['status']) ?></span>
 
+            <?php if ($hasReplied): ?>
             <form method="POST" onsubmit="return confirm('Are you sure you want to delete this doubt?');" style="display:inline;">
                 <?= csrf_field() ?>
                 <button type="submit" name="delete_doubt" class="btn btn-sm btn-danger" style="padding: 8px 15px; font-size: 0.9rem;">Delete Doubt</button>
             </form>
+            <?php endif; ?>
         </h1>
 
         <?php $f = get_flash(); if ($f): ?>

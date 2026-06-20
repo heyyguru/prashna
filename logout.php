@@ -7,8 +7,21 @@ if (isset($_COOKIE['refresh_token'])) {
     $stmt->execute([$_COOKIE['refresh_token']]);
 }
 
-setcookie('access_token', '', time() - 3600, '/');
-setcookie('refresh_token', '', time() - 3600, '/');
+$isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+setcookie('access_token', '', [
+    'expires' => time() - 3600,
+    'path' => '/',
+    'secure' => $isSecure,
+    'httponly' => true,
+    'samesite' => 'Strict'
+]);
+setcookie('refresh_token', '', [
+    'expires' => time() - 3600,
+    'path' => '/',
+    'secure' => $isSecure,
+    'httponly' => true,
+    'samesite' => 'Strict'
+]);
 
 $_SESSION = [];
 session_destroy();

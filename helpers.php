@@ -45,7 +45,14 @@ function refresh_access_token(): ?int {
             'exp' => time() + 15 * 60 // 15 mins
         ];
         $access_token = encode_jwt($access_payload, JWT_SECRET);
-        setcookie('access_token', $access_token, time() + 15 * 60, '/', '', false, true);
+        $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+        setcookie('access_token', $access_token, [
+            'expires' => time() + 15 * 60,
+            'path' => '/',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Strict'
+        ]);
         $_COOKIE['access_token'] = $access_token;
         return (int)$user['id'];
     }
@@ -67,8 +74,21 @@ function login_user(int $user_id): void {
     $stmt = $pdo->prepare("UPDATE users SET refresh_token = ? WHERE id = ?");
     $stmt->execute([$refresh_token, $user_id]);
     
-    setcookie('access_token', $access_token, time() + 15 * 60, '/', '', false, true);
-    setcookie('refresh_token', $refresh_token, time() + 7 * 24 * 60 * 60, '/', '', false, true);
+    $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    setcookie('access_token', $access_token, [
+        'expires' => time() + 15 * 60,
+        'path' => '/',
+        'secure' => $isSecure,
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ]);
+    setcookie('refresh_token', $refresh_token, [
+        'expires' => time() + 7 * 24 * 60 * 60,
+        'path' => '/',
+        'secure' => $isSecure,
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ]);
     $_COOKIE['access_token'] = $access_token;
     $_COOKIE['refresh_token'] = $refresh_token;
     

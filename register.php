@@ -13,13 +13,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $confirm = $_POST['confirm_password'] ?? '';
 
-    if ($name === '') $errors[] = 'Name is required.';
-    if ($phone === '') $errors[] = 'Phone number is required.';
-    if (!preg_match('/^[0-9]{7,15}$/', $phone)) $errors[] = 'Enter a valid phone number (digits only).';
-    if ($email === '') $errors[] = 'Email is required.';
-    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Enter a valid email.';
-    if (strlen($password) < 6) $errors[] = 'Password must be at least 6 characters.';
-    if ($password !== $confirm) $errors[] = 'Passwords do not match.';
+    if ($name === '') {
+        $errors[] = 'Name is required.';
+    } elseif (!preg_match('/^[\p{L}\s.-]{2,100}$/u', $name)) {
+        $errors[] = 'Name contains invalid characters or is too long/short.';
+    }
+
+    if ($phone === '') {
+        $errors[] = 'Phone number is required.';
+    } elseif (!preg_match('/^[0-9]{7,15}$/', $phone)) {
+        $errors[] = 'Enter a valid phone number (digits only, 7-15 length).';
+    }
+
+    if ($email === '') {
+        $errors[] = 'Email is required.';
+    } elseif (strlen($email) > 150 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Enter a valid email under 150 characters.';
+    }
+
+    if (strlen($password) < 6 || strlen($password) > 255) {
+        $errors[] = 'Password must be between 6 and 255 characters.';
+    }
+    if ($password !== $confirm) {
+        $errors[] = 'Passwords do not match.';
+    }
 
     if (empty($errors)) {
         $pdo = getDB();
@@ -31,13 +48,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("INSERT INTO users (role, name, phone, email, password_hash) VALUES ('student', ?, ?, ?, ?)");
-        $stmt->execute([$name, $phone, $email ?: null, $hash]);
-        $user_id = (int)$pdo->lastInsertId();
-        login_user($user_id);
-        set_flash('success', 'Registration successful! Welcome to HeyyGuru.');
-        redirect('/student/dashboard.php');
+        // Use Argon2id if available, fallback to bcrypt
+        $algo = defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT;
+        $options = defined('PASSWORD_ARGON2ID') ? ['memory_cost' => 65536, 'time_cost' => 4, 'threads' => 2] : ['cost' => 12];
+        
+        $hash = password_hash($password, $algo, $options);
+        $verification_token = bin2hex(random_bytes(32));
+        
+        $stmt = $pdo->prepare("INSERT INTO users (role, name, phone, email, password_hash, verification_token) VALUES ('student', ?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $phone, $email, $hash, $verification_token]);
+        
+        $verify_link = "http://" . $_SERVER['HTTP_HOST'] . "/verify_email.php?token=" . $verification_token;
+        $email_body = "Hi $name,<br><br>Please verify your email address by clicking the link below:<br><a href='$verify_link'>Verify Email</a><br><br>Thanks,<br>HeyyGuru Team";
+        
+        sendEmail($email, "Verify Your HeyyGuru Account", $email_body);
+        
+        set_flash('success', 'Registration successful! Please check your email to verify your account before logging in.');
+        redirect('/login.php');
     }
 }
 ?>
